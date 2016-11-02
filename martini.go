@@ -176,11 +176,20 @@ func (c *context) Written() bool {
 
 func (c *context) run() {
 	for c.index <= len(c.handlers) {
-		_, err := c.Invoke(c.handler())
+		vals, err := c.Invoke(c.handler())
 		if err != nil {
 			panic(err)
 		}
 		c.index += 1
+
+		if len(vals) > 0 {
+			val := vals[0]
+			if val.Kind() == reflect.Bool {
+				if val.Bool() {
+					return
+				}
+			}
+		}
 
 		if c.Written() {
 			return
